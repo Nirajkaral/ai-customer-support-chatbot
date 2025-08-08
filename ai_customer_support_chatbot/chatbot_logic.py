@@ -1,13 +1,17 @@
-import spacy
+# Install and load spaCy
+!pip install -U spacy
+!python -m spacy download en_core_web_sm
 
-# Load the English NLP model
+import spacy
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+
+# Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
+# Chatbot logic
 def generate_response(user_input):
-    # Process input with spaCy
     doc = nlp(user_input.lower())
-
-    # Extract lemmas from the input for more flexible matching
     lemmas = [token.lemma_ for token in doc]
 
     if "hello" in lemmas or "hi" in lemmas:
@@ -28,9 +32,36 @@ def generate_response(user_input):
     else:
         return "Sorry, I didn't understand that. Could you please rephrase your question?"
 
-# Example test
-while True:
-    user_input = input("You: ")
-    if user_input.lower() in ["exit", "quit"]:
-        break
-    print("Bot:", generate_response(user_input))
+# Widgets: Input box and Submit button
+input_box = widgets.Text(
+    placeholder='Type your query here...',
+    description='Your Query:',
+    disabled=False
+)
+
+submit_button = widgets.Button(
+    description='Submit',
+    button_style='primary'
+)
+
+output_box = widgets.Output()
+
+# Button click event
+def on_submit_clicked(b):
+    user_input = input_box.value.strip()
+    with output_box:
+        clear_output()
+        if user_input == "":
+            print("Please enter a query.")
+        elif user_input.lower() in ["exit", "quit"]:
+            print("Bot: Goodbye!")
+        else:
+            print(f"You: {user_input}")
+            print("Bot:", generate_response(user_input))
+        input_box.value = ""
+
+# Connect button to function
+submit_button.on_click(on_submit_clicked)
+
+# Display UI
+display(input_box, submit_button, output_box)
